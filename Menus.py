@@ -1,6 +1,6 @@
 # El programa debe tener un menú de opciones de donde se pueda realizar el pago del cupo de la tarjeta de crédito, como también simular nuevas compras, y estas una vez sumadas se resten al cupo disponible. 
 # Las opciones disponibles deben estar construidas de la siguiente forma:
-deudaTarjeta=1000000
+saldo=100000
 while True:
 
     print("1. Pago tarjeta de credito")
@@ -10,6 +10,11 @@ while True:
 
     if op==1:
         print("Pagando... ")
+        monto_pagar= int(input("Ingrese monto a pagar: "))
+        if monto_pagar>= 0:
+            if monto_pagar<=saldo:
+                saldo= saldo-monto_pagar
+                print(f"El saldo es {saldo}")
     elif op ==2:
         print("Cmprando")
     elif op==3:
