@@ -18,93 +18,93 @@ while True:
             print("Ingrese una opción del 1 al 3")
 
         elif op == 1:
-            
             if usuario1==None and usuario2==None and usuario3==None:   
                 print("*Es necesario registrar almenos un usuario antes de iniciar sesion, cree un usuario usando la opcion 2")
-            else:
+                continue
+            sesion_cerrada = False
+            while True:
                 print("*Menu de inicio de sesion*")
                 user_log=input("Ingrese Usuario: ")                    
                 pass_log=input("Ingrese Password: ")
                 if (user_log == usuario1 and pass_log==contrasena1) or (user_log==usuario2 and pass_log==contrasena2) or (user_log==usuario3 and pass_log==contrasena3):
-                    print("*Inicio de sesion exitoso")
+                    print("*Inicio de sesion exitoso")                        
                     while True:
                         try:
                             print("*****************************")
-                            print("*Que deseas hacer?*")
+                            print("*MENU DE USUARIO*")
                             print("1) Realizar llamada")
                             print("2) Enviar correo Electronico")
                             print("3) Cerrar sesion")
                             op=int(input("Ingrese su opcion: "))
-                            if op!=1 or op!=2 or op!=3:
-                                print("Debe ingresar una opcion valida, 1, 2,o 3")
-                            else:
-                                break
-                        except ValueError:
-                            print("Debe ingresar una opción valida, solo digitos")
-                        if op==1:
-                            while True:
-                                try:
-                                    print("********")
-                                    print("*Realiza tu llamada*")
-                                    telefono=(input("Ingrese numero telefonico: "))
-                                    valid9=telefono.startswith("9")
-                                    if valid9==True and len(telefono)==9:
-                                        print("Telefono Valido, LLamando..... TUUUT TUUUT TUUUT")
-                                        break
-                                    elif telefono != valid9:
-                                        print("*El telefono debe comenzar con el digito '9' y tener 9 digitos")
-                                    elif len(telefono)!=9:
-                                        print("*El telefono debe comenzar con el digito '9' y tener 9 digitos")                                         
+                            if op >3 and op<1:
+                                print("Debe ingresar una opcion valida, 1, 2,o 3") 
+                                continue              
+                            if op==1:
+                                while True:
+                                    try:
+                                        print("********")
+                                        print("*Realiza tu llamada*")
+                                        telefono=(input("Ingrese numero telefonico: "))
+                                        valid9=telefono.startswith("9")
+                                        if valid9==True and len(telefono)==9:
+                                            print("Telefono Valido, LLamando..... TUUUT TUUUT TUUUT")
+                                            break
+                                        elif telefono != valid9:
+                                            print("*El telefono debe comenzar con el digito '9' y tener 9 digitos")
+                                        elif len(telefono)!=9:
+                                            print("*El telefono debe comenzar con el digito '9' y tener 9 digitos")                                         
+                                        else:
+                                            print("*Verifique formato del numero telefonico, debe comenzar con 9 y tener 9 digitos")
+                                    except ValueError:
+                                        print("*Error, ingresa solo digitos para llamar")
+                            elif op==2:
+                                # La opción 2, solicita un correo electrónico, el cual debe tener por lo menos un carácter de “@” (validar usando for y while) y lo guardará en una variable llamada “correo”.
+                                # También solicitará el mensaje a enviar y lo guardará en una variable llamada “mensaje”
+                                while True:
+                                    print("******************")
+                                    print("*Envio de Correo Electronico")
+                                    email=(input("Ingrese Correo Destinatario: "))
+                                    if "@" in email:
+                                        mensaje=(input("Ingrese el contenido del correo: "))
+                                        print("Enviando...")
+                                        print("Correo enviado!...")
+                                        break   
                                     else:
-                                        print("*Verifique formato del numero telefonico, debe comenzar con 9 y tener 9 digitos")
-                                except ValueError:
-                                    print("*Error, ingresa solo digitos para llamar")
-                        elif op==2:
-                            # La opción 2, solicita un correo electrónico, el cual debe tener por lo menos un carácter de “@” (validar usando for y while) y lo guardará en una variable llamada “correo”.
-                            # También solicitará el mensaje a enviar y lo guardará en una variable llamada “mensaje”
-
-                            while True:
-                                print("******************")
-                                print("*Envio de Correo Electronico")
-                                email=(input("Ingrese Correo Destinatario: "))
-                                if "@" in email:
-                                    mensaje=(input("Ingrese el contenido del correo: "))
-                                    print("Enviando...")
-                                    print("Correo enviado!...")
-                                    break   
-                                else:
-                                    print("El correo electronico debe tener contener un @")
-                        elif op==3:
-                            print("Cerrando Sesion...")
-                            print("Sesion Cerrada")
-                            break
-                        else:
-                            print("Debe ingresar una opcion valida: 1,2 o 3")
-                            # Finalmente cerrar sesión, volverá al menú principal.                                                       
+                                        print("El correo electronico debe tener contener un @")
+                            # Finalmente cerrar sesión, volverá al menú principal.
+                            elif op==3:
+                                print("Cerrando Sesion...")
+                                print("Sesion Cerrada")
+                                sesion_cerrada = True
+                                break
+                            else:
+                                print("Debe ingresar una opcion valida: 1,2 o 3")
+                        except ValueError:
+                            print("Debe ingresar una opción valida, solo digitos")                
+                    if sesion_cerrada:
+                        break
+                else:
+                    print("usuario o contrasena incorrecta, intente nuevamente")                                                       
         elif op==2:
             print("*******************")
             print("*Registro de usuario*")
-            if usuario1==None and contrasena1==None:
+            if usuario1==None:
                 usuario1=input("Ingrese usuario a registrar: ")
                 contrasena1=input("Ingrese contraseña: ")    
-                contrasena1=input("Ingrese contraseña nuevamente: ")
                 print("*Usuario creado exitosamente, ahora puede iniciar sesion")
-            elif usuario1!=None and contrasena1 != None:
+            elif usuario1!=None:
                 usuario2=input("Ingrese usuario a registrar: ")
                 contrasena2=input("Ingrese contraseña: ")    
-                contrasena2=input("Ingrese contraseña nuevamente: ")
                 print("*Usuario creado exitosamente, ahora puede iniciar sesion")
-            elif (usuario2!=None and contrasena2 != None) or (usuario1!=None and contrasena1 != None):
+            elif usuario2!=None and usuario1!=None:
                 usuario3=input("Ingrese usuario: ")
                 contrasena3=input("Ingrese contraseña a registrar: ")    
-                contrasena3=input("Ingrese contraseña nuevamente: ")
                 print("*Usuario creado exitosamente, ahora puede iniciar sesion")
             else:
                 print("Lo sentimos, no pueden registrarse mas usuarios")
         elif op==3:
             print("Saliendo, Chau")   
-            break             
-                          
+            break                                  
     except ValueError:
         print("Error, ingrese solo digitos")
 
