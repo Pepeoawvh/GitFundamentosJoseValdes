@@ -20,7 +20,7 @@ def agregar_producto(productos):
     #asigna valor numerico entero a variable "producto" sstock segun input
         else:
             stock=int(input("Ingrese stock del producto: "))
-            if stock <= 0 or stock == "":
+            if stock < 0 or stock == "":
                 print("Debe ingresar una cantidad valida, reingrese")
                 continue
             else:
@@ -38,24 +38,32 @@ def agregar_producto(productos):
 def mostrar_productos(productos):
     print("----Mostrar Productos----")   
     if not productos:
-        print("El inventario esta vacio, agrege productos primero")
+        print("El inventario esta vacio, agregue productos primero")
     else:
         print(f"Estos son los productos del inventario {productos}")
 
 def buscar_producto(productos):
     if not productos:
-        print("El inventario esta vacio, agrege productos primero")
+        print("El inventario esta vacio, agregue productos primero")
     elif productos: 
         busqueda=input("Ingrese nombre de producto a buscar: ")
         if busqueda in productos:
             print(f"Producto encontrado! {busqueda} Stock: {productos[busqueda][0]}, Precio: {productos[busqueda][1]}")
-    else:
-        print("No se encontro el producto, intente nuevamente")
+        else:
+            print("No se encontro el producto, intente nuevamente")
     
 def producto_mas_caro(productos):
     print("----Producto mas caro----")
     if not productos:
-        print("El inventario esta vacio, agrege productos primero")
+        print("El inventario esta vacio, agregue productos primero")
     else:
-        print(f"Nuestro producto mas caro es {max(productos)} y su valor es {max(productos.values(2))}")
-    
+        precioMax=0
+        productoMax=""
+        for producto in productos:
+            precio= productos[producto][1]
+            if precio > precioMax:
+                precioMax=precio
+                productoMax=producto
+        #inicializar un loop que recorre los indices de la biblioteca
+        
+        print(f"Nuestro producto mas caro es {productoMax} y su valor es {precioMax}")
