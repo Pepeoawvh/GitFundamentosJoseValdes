@@ -1,0 +1,212 @@
+
+<h2 class="sr-only">Visualizador interactivo del call stack: muestra paso a paso cómo Python apila y desapila marcos de función</h2>
+<style>
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-8px); } }
+  .frame { border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 10px 14px; margin-bottom: 6px; animation: fadeIn 0.3s ease; font-size: 13px; }
+  .frame-name { font-weight: 500; font-size: 13px; color: var(--color-text-primary); margin-bottom: 4px; font-family: var(--font-mono); }
+  .frame-vars { font-size: 12px; color: var(--color-text-secondary); font-family: var(--font-mono); line-height: 1.6; }
+  .frame-retslot { font-size: 12px; font-family: var(--font-mono); margin-top: 4px; padding-top: 4px; border-top: 0.5px solid var(--color-border-tertiary); }
+  .frame-retslot.filled { color: #27500A; }
+  .frame-retslot.empty { color: var(--color-text-secondary); }
+  .frame-active { background: var(--color-background-secondary); }
+  .frame-waiting { background: var(--color-background-primary); opacity: 0.75; }
+  .step-btn { font-size: 13px; padding: 6px 18px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-primary); cursor: pointer; margin-right: 8px; }
+  .step-btn:hover { background: var(--color-background-secondary); }
+  .step-btn:disabled { opacity: 0.35; cursor: default; }
+  .explanation { font-size: 14px; color: var(--color-text-primary); line-height: 1.65; margin: 12px 0; min-height: 48px; }
+  .code-line { font-family: var(--font-mono); font-size: 12px; padding: 2px 6px; border-radius: 4px; }
+  .code-line.active { background: var(--color-background-info); color: var(--color-text-info); }
+  .mem-label { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .result-val { font-family: var(--font-mono); font-size: 13px; color: #27500A; font-weight: 500; }
+  .stack-empty { font-size: 13px; color: var(--color-text-secondary); text-align: center; padding: 16px 0; border: 0.5px dashed var(--color-border-tertiary); border-radius: var(--border-radius-md); }
+  .tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
+  .tag-active { background: #E6F1FB; color: #0C447C; }
+  .tag-waiting { background: #FAEEDA; color: #633806; }
+  .progress { display: flex; gap: 4px; margin-bottom: 12px; }
+  .progress-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-border-secondary); transition: background 0.2s; }
+  .progress-dot.done { background: #1D9E75; }
+  .progress-dot.current { background: #378ADD; }
+</style>
+
+<div style="padding: 1rem 0;">
+  <div style="display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 20px; align-items: start;">
+
+    <div>
+      <div class="mem-label">código ejecutándose</div>
+      <div style="background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 12px 14px; font-family: var(--font-mono); font-size: 12px; line-height: 1.9;">
+        <div id="line-0"  class="code-line">def cuadrado(n):</div>
+        <div id="line-1"  class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;resultado = n * n</div>
+        <div id="line-2"  class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;return resultado</div>
+        <div id="line-3"  class="code-line">&nbsp;</div>
+        <div id="line-4"  class="code-line">def calcular(x):</div>
+        <div id="line-5"  class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;valor = cuadrado(x)</div>
+        <div id="line-6"  class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;return valor * 2</div>
+        <div id="line-7"  class="code-line">&nbsp;</div>
+        <div id="line-8"  class="code-line">print(calcular(3))</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="mem-label">call stack (memoria)</div>
+      <div id="stack-display" style="min-height: 120px;">
+        <div class="stack-empty">vacío — aún no hay llamadas</div>
+      </div>
+      <div id="result-display" style="display:none; margin-top:8px; font-size:13px; color: var(--color-text-secondary);">
+        resultado final: <span class="result-val" id="final-val"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress" id="progress-dots"></div>
+
+  <div class="explanation" id="explanation">Presiona "siguiente paso" para empezar.</div>
+
+  <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+    <button class="step-btn" id="prev-btn" onclick="prevStep()" disabled>← anterior</button>
+    <button class="step-btn" id="next-btn" onclick="nextStep()">siguiente paso →</button>
+    <button class="step-btn" onclick="reset()" style="margin-left: auto;">reiniciar</button>
+  </div>
+</div>
+
+<script>
+const steps = [
+  {
+    activeLines: [8],
+    stack: [
+      { name: "print(calcular(3))", tag: "active", vars: [], retSlot: null, filled: false }
+    ],
+    explanation: "Python lee <code>print(calcular(3))</code>. Para poder imprimir algo, primero tiene que evaluar <code>calcular(3)</code>. Python crea un marco para esta llamada y lo pone en la pila. La pila ahora tiene un frame activo.",
+  },
+  {
+    activeLines: [5],
+    stack: [
+      { name: "print(...)", tag: "waiting", vars: [], retSlot: "esperando valor de calcular()", filled: false },
+      { name: "calcular(x=3)", tag: "active", vars: ["x = 3"], retSlot: null, filled: false }
+    ],
+    explanation: "Entramos a <code>calcular</code>. Python crea un segundo marco encima del anterior. El marco de <code>print</code> queda <em>pausado</em> abajo, esperando. Dentro de <code>calcular</code>, Python llega a la línea <code>valor = cuadrado(x)</code> y necesita evaluar <code>cuadrado(3)</code> primero.",
+  },
+  {
+    activeLines: [1],
+    stack: [
+      { name: "print(...)", tag: "waiting", vars: [], retSlot: "esperando valor de calcular()", filled: false },
+      { name: "calcular(x=3)", tag: "waiting", vars: ["x = 3"], retSlot: "esperando valor de cuadrado()", filled: false },
+      { name: "cuadrado(n=3)", tag: "active", vars: ["n = 3", "resultado = 9"], retSlot: null, filled: false }
+    ],
+    explanation: "Python crea un tercer marco para <code>cuadrado</code>. Ahora hay tres marcos en la pila. <code>cuadrado</code> calcula <code>resultado = 3 * 3 = 9</code>. Los dos marcos de abajo siguen pausados esperando.",
+  },
+  {
+    activeLines: [2],
+    stack: [
+      { name: "print(...)", tag: "waiting", vars: [], retSlot: "esperando valor de calcular()", filled: false },
+      { name: "calcular(x=3)", tag: "waiting", vars: ["x = 3"], retSlot: "← aquí llega: 9", filled: true },
+      { name: "cuadrado(n=3) — ejecutando return", tag: "active", vars: ["n = 3", "resultado = 9"], retSlot: null, filled: false }
+    ],
+    explanation: "<strong>Aquí ocurre el return.</strong> Son dos pasos en orden estricto: primero, el valor <code>9</code> se deposita en el marco de <code>calcular</code> (en la ranura que decía 'esperando'). Luego, recién después de ese depósito, el marco de <code>cuadrado</code> se elimina. El valor nunca 'viaja' con el marco que desaparece — lo deja antes de irse.",
+  },
+  {
+    activeLines: [6],
+    stack: [
+      { name: "print(...)", tag: "waiting", vars: [], retSlot: "esperando valor de calcular()", filled: false },
+      { name: "calcular(x=3)", tag: "active", vars: ["x = 3", "valor = 9"], retSlot: null, filled: false }
+    ],
+    explanation: "El marco de <code>cuadrado</code> ya no existe. <code>calcular</code> se despierta con <code>valor = 9</code>. Ahora ejecuta <code>return valor * 2</code>, o sea <code>return 18</code>. El mismo proceso: primero deposita 18 en el marco de abajo, luego se elimina.",
+  },
+  {
+    activeLines: [8],
+    stack: [
+      { name: "print(...) — ejecutando", tag: "active", vars: [], retSlot: "← recibió: 18", filled: true }
+    ],
+    explanation: "El marco de <code>calcular</code> ya no existe. <code>print</code> se despierta con el valor <code>18</code> ya disponible. Lo imprime. Cuando termina, su propio marco también se elimina y la pila queda vacía.",
+    result: "18"
+  },
+  {
+    activeLines: [],
+    stack: [],
+    explanation: "La pila está vacía. El programa terminó. El valor <code>18</code> fue impreso. En ningún momento un marco 'cargó' su valor consigo al eliminarse — siempre lo depositó en el marco de abajo antes de desaparecer.",
+    result: "18",
+    done: true
+  }
+];
+
+let current = -1;
+
+function buildDots() {
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = steps.map((_, i) => `<div class="progress-dot" id="dot-${i}"></div>`).join('');
+}
+
+function updateDots() {
+  steps.forEach((_, i) => {
+    const d = document.getElementById('dot-' + i);
+    if (!d) return;
+    d.className = 'progress-dot' + (i < current ? ' done' : i === current ? ' current' : '');
+  });
+}
+
+function render() {
+  if (current < 0) { reset(); return; }
+  const step = steps[current];
+
+  document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+  (step.activeLines || []).forEach(l => {
+    const el = document.getElementById('line-' + l);
+    if (el) el.classList.add('active');
+  });
+
+  const stack = document.getElementById('stack-display');
+  if (!step.stack || step.stack.length === 0) {
+    stack.innerHTML = '<div class="stack-empty">pila vacía — ejecución terminada</div>';
+  } else {
+    const reversed = [...step.stack].reverse();
+    stack.innerHTML = reversed.map((f, i) => {
+      const isTop = i === 0;
+      const tag = f.tag === 'active'
+        ? '<span class="tag tag-active">ejecutando</span>'
+        : '<span class="tag tag-waiting">pausado</span>';
+      const vars = f.vars && f.vars.length
+        ? f.vars.map(v => `<div>${v}</div>`).join('')
+        : '<div style="color:var(--color-text-secondary)">sin variables locales aún</div>';
+      const slot = f.retSlot
+        ? `<div class="frame-retslot ${f.filled ? 'filled' : 'empty'}">${f.filled ? '✓ ' : '○ '}${f.retSlot}</div>`
+        : '';
+      return `<div class="frame ${isTop ? 'frame-active' : 'frame-waiting'}">
+        <div class="frame-name">${f.name}${tag}</div>
+        <div class="frame-vars">${vars}</div>
+        ${slot}
+      </div>`;
+    }).join('');
+  }
+
+  const explanation = document.getElementById('explanation');
+  explanation.innerHTML = step.explanation;
+
+  const resultDisplay = document.getElementById('result-display');
+  if (step.result) {
+    resultDisplay.style.display = 'block';
+    document.getElementById('final-val').textContent = step.result;
+  } else {
+    resultDisplay.style.display = 'none';
+  }
+
+  document.getElementById('prev-btn').disabled = current <= 0;
+  document.getElementById('next-btn').disabled = current >= steps.length - 1;
+  updateDots();
+}
+
+function nextStep() { if (current < steps.length - 1) { current++; render(); } }
+function prevStep() { if (current > 0) { current--; render(); } }
+function reset() {
+  current = -1;
+  document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+  document.getElementById('stack-display').innerHTML = '<div class="stack-empty">vacío — aún no hay llamadas</div>';
+  document.getElementById('explanation').textContent = 'Presiona "siguiente paso" para empezar.';
+  document.getElementById('result-display').style.display = 'none';
+  document.getElementById('prev-btn').disabled = true;
+  document.getElementById('next-btn').disabled = false;
+  updateDots();
+}
+
+buildDots();
+updateDots();
+</script>

@@ -38,7 +38,7 @@ while True:
             print("Saliendo del menu")
             break  
     except ValueError:
-        print("Debe ingresar una opcion valida")
+        print("Debe ingresar una Debe ingresar numeros")
 
 
 # Requerimientos

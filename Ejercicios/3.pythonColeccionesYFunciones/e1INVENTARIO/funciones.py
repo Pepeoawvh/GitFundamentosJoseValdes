@@ -46,7 +46,7 @@ def buscar_producto(productos):
     if not productos:
         print("El inventario esta vacio, agregue productos primero")
     elif productos: 
-        busqueda=input("Ingrese nombre de producto a buscar: ")
+        busqueda=input("Ingrese nombre de producto a buscar: ").strip().lower()
         if busqueda in productos:
             print(f"Producto encontrado! {busqueda} Stock: {productos[busqueda][0]}, Precio: {productos[busqueda][1]}")
         else:
