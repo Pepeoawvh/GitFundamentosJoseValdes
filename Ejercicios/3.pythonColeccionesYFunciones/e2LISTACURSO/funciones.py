@@ -8,7 +8,7 @@
 # Funciones obligatorias
 
 estudiantes={}
-salir=False
+
 nombre=""
 nota=0
 promedio=0
