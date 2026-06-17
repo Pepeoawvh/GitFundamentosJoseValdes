@@ -8,17 +8,14 @@ def agregarUsuario(usuarios):
             print("***No puede dejar el campo vacio, reintente")
             continue
         elif nombre.isalpha():
-            usuarios[nombre]=[]
             while True:
                 sexo=input("Ingrese sexo: M o F: :").upper()
                 if sexo=="M" or sexo=="F":
-                    usuarios[nombre].append(sexo)
                     while True:
                         contrasena=input("Ingrese contrasena: ")
                         if len(contrasena)>=8 and any(caracter.isdigit() for caracter in contrasena) and any(caracter.isalpha() for caracter in contrasena) and not " " in contrasena:
-                            usuarios[nombre].append(contrasena)
+                            usuarios[nombre]={"sexo":sexo,"contrasena":contrasena}
                             print("***Usuario creado exitosamente")
-                            print(usuarios[nombre])
                             return
                         else:
                             print("***Contrasena debe tener minimo 8 caracteres, al menos un numero, almenos una letra y no puede tener espacios")
@@ -35,7 +32,8 @@ def buscarUsuario(usuarios):
     if not usuarios:
         print("***La lista de usuarios esta vacia, registre uno primero")
     elif busqueda in usuarios and busqueda.isalpha():
-         print(f"usuario encontrado! {busqueda}: sexo: {usuarios[busqueda][0]}, contrasena: {usuarios[busqueda][1]}")
+         print(f"Usuario encontrado! {busqueda}: "f"sexo: {usuarios[busqueda]['sexo']}, "f"contrasena: {usuarios[busqueda]['contrasena']}"
+)
     elif any(caracter.isdigit() for caracter in busqueda):
         print("***El nombre a buscar no puede contener numeros, reintente")
     else:
@@ -55,3 +53,7 @@ def eliminarUsuario(usuarios):
     else:
         print("***No se pudo eliminar usuario")
          
+
+
+
+# tarea: convertirlo a diccionarios
