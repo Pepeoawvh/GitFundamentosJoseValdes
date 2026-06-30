@@ -1,0 +1,174 @@
+
+def mostrarMenu():
+    print("===Menu de tienda de videojuegos===")
+    print("1.Agregar consola")
+    print("2.Buscar consola por sigla")
+    print("3.Eliminar Consola")
+    print("4.Mostrar todas las consolas")
+    print("5.Salir")
+    
+consolas={}
+ventas={} 
+###################
+#FUNCIONES MENUS
+def agregarConsola(consolas,ventas):
+    while True:
+        sigla=input("Ingrese sigla de consola: ").upper()
+        validacion=validarSigla(sigla)
+        print(validacion)
+        if not validacion:
+            print("La sigla debe tener entre 2 y 5 caracteres")
+            continue
+        elif sigla in consolas:
+            print("Esta consola ya existe en nuestro catalogo, reintente")
+            continue
+        else:
+            break
+    while True:
+        nombreConsola=input("Ingrese nombre de consola: ")
+        validacion=validarNombre(nombreConsola)
+        print(validacion)
+        if not validacion:
+            print("El nombre no puede estar vacio y debe tener entre 3 y 40 caracteres")
+            continue
+        else:
+            break
+    while True:
+        fabricanteConsola=input("Ingrese fabricante de consola: ")
+        validacion=validarFabricante(fabricanteConsola)
+        print(validacion)
+        if not validacion:
+            print("El nombre no puede estar vacio y debe tener entre 2 y 30 caracteres")
+            continue           
+        else:
+            break
+    while True:
+        try:
+            lanzamiento=int(input("Ingrese ano de lanzamiento: "))
+            validacion=validarAno(lanzamiento)
+            if not validacion:
+                print("Solo se permiten juegos lanzados entre 1972 y 2026")
+        except ValueError:
+            print("El ano de lanzamiento debe ser un numero entero")
+        else:
+            break
+    while True:
+        try:
+            precio=float(input("Ingrese valor de consola: "))
+        except ValueError:
+            print("Debe ingresar digitos ")
+            continue
+        validacion=validarPrecio(precio)
+        if not validacion:
+            print("Debe ser un numero mayor a 0")
+            continue
+        else:
+            break
+        
+    while True:
+        try:
+            stock=int(input("ingrese stock: "))
+        except ValueError:
+            print("Debe ingresar digitos")
+            continue   
+        validacion=validarStock(stock)
+        if not validacion:
+            print("Debe ingresar numeros positivos")
+            continue
+        else:        
+            break
+    consolas[sigla]=[nombreConsola,fabricanteConsola,lanzamiento]
+    ventas[sigla]=[precio,stock]
+    print("Se ha agregado exitosamente la consola al inventario")
+
+###################
+#VALIDACIONES
+def validarSigla(sigla):
+    return 2<= len(sigla) <= 5
+
+def validarNombre(nombre):
+    if 3 <= len(nombre) <= 40 and nombre.strip()!="":
+        return True
+    else:
+        return False
+def validarFabricante(fabricante):
+    if 2 <= len(fabricante) <= 30 and fabricante.strip()!="":
+        return True
+    else:
+        return False
+def validarAno(lanzamiento):
+    return 1972 <= lanzamiento <= 2026
+
+def validarPrecio(precio):
+    return precio > 0
+
+def validarStock(stock):
+    return stock >= 0
+
+####################
+#FUNCIONES REUTILIZABLES
+def buscarPorSigla(consolas,ventas):
+    while True:
+        busqueda=input("Ingrese Sigla del juego: ").strip().upper()
+        validacion=validarSigla(busqueda)
+        if not validacion:
+            print("El nombre no puede estar vacio y debe tener entre 3 y 40 caracteres")
+            continue
+        elif validacion and busqueda not in consolas:
+            print("La sigla esta correctamente escrita, pero no existe en el catalogo, reintente o ingresela")
+            break
+        elif busqueda in consolas:
+            print("*Consola encontrada!")
+            detalleConsola(busqueda, consolas, ventas)
+            
+def detalleConsola(busqueda,consolas,ventas):
+    print(consolas[busqueda][0])
+    
+            
+
+
+#################################
+#PROGRAMA PRINCIPAL:
+while True:
+    mostrarMenu()
+    try:
+        opMenu=int(input("Ingrese opcion: "))
+        if opMenu==1:
+            print("=== AGREGAR CONSOLA ===")
+            agregarConsola(consolas,ventas)
+        elif opMenu==2:
+            print("=== BUSCAR CONSOLA ===")
+        elif opMenu==3:
+            print("=== ELIMINAR CONSOLA ===")
+        elif opMenu==4:
+            print("=== CATALOGO COMPLETO ===")
+        elif opMenu==5:
+            print("Saliendo...")
+            break
+        else:
+            print("Error: Opcion invalida: opciones del 1 al 5")
+    except ValueError:
+        print("Error: Debe ingresar solo numeros")
+    
+#     El programa DEBE cumplir con las siguientes restricciones
+# •
+#  Ambos diccionarios deben inicializarse vacíos al inicio del programa (sin datos de
+# prueba).
+# •
+#  Cada funcionalidad debe implementarse en funciones separadas con
+# responsabilidad única.
+# •
+#  Las funciones de validación deben recibir el dato a validar y retornar True o False
+# únicamente, sin imprimir mensajes.
+# •
+#  Los mensajes de error ante datos inválidos deben mostrarse en la función que
+# solicita los datos, no en las funciones de validación.
+# •
+#  Los diccionarios deben pasarse como argumentos a las funciones; NO se permite
+# el uso de variables globales.
+# •
+#  La función de eliminar debe invocar la función de búsqueda, sin duplicar su
+# lógica.
+# •
+#  El menú debe mostrarse en cada iteración del ciclo principal, que permanece
+# activo hasta que el usuario seleccione la opción de salida.
