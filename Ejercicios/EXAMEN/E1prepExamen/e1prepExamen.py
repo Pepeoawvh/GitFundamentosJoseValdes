@@ -171,7 +171,6 @@ def consolaEncontrada(busqueda,consolas):
         return True
         
 
-
 #################################
 #PROGRAMA PRINCIPAL:
 while True:
