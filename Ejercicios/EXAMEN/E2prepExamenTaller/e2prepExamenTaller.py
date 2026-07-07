@@ -204,7 +204,7 @@ def eliminarBusqueda(codigoEliminar,arreglos,bodega):
     
 # validaciones
 def validarCodigo(codArreglo):
-    return codArreglo.strip() != ""
+    return codArreglo.strip() != "" 
 
 def validarTexto(texto):
     return texto.strip() != ""
